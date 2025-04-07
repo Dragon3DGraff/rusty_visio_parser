@@ -247,10 +247,14 @@ fn real_main() -> i32 {
                         //     children: Vec::new(),
                         //  //   namespaces: Vec::new(),
                         // });
+                        let mut attrs = HashMap::new();
+
+                        attrs.insert("Text".to_string(), text);
+
                         let  element =Element {
-                                    inner_id: number_count,
-                            name: text,
-                            attrs: HashMap::new(),
+                            inner_id: number_count,
+                            name: "Characters".to_string(),
+                            attrs,
                             children: Vec::new(),
                             parent: *parent
                         };
