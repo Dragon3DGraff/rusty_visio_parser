@@ -30,22 +30,8 @@ pub fn encoding(
 ) -> HashMap<i64, Element> {
     let mangled_name = &file.mangled_name();
 
-    // let f_name_p = match mangled_name.file_name() {
-    //     Some(name) => name,
-    //     None => {
-    //
-    //     }
-    // };
-
     let fname = mangled_name.file_name().unwrap().to_str().unwrap();
-    println!("name {} ", fname);
-    //  {
-    //     Some(name) => name,
-    //     None => {
-    //         println!("No name");
-    //         String::from("").as_str()
-    //     }
-    // };
+
     let mut temp_hash: HashMap<String, String> = HashMap::new();
 
     let xmlfile: BufReader<&mut zip::read::ZipFile<'_, BufReader<fs::File>>> = BufReader::new(file);
