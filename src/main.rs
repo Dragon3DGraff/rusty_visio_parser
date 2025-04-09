@@ -1,14 +1,36 @@
+use std::collections::HashMap;
 use std::fs;
 use std::io::BufReader;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json::to_string_pretty;
 
 mod get_metadata;
+mod helpers;
 
 fn main() {
     std::process::exit(real_main());
 }
+#[derive(Serialize, Debug, Clone)]
+pub struct Diagram {
+    rels: HashMap<String, HashMap<String, String>>,
+    pages: Vec<Page>,
+}
+
+#[derive(Serialize, Debug, Clone)]
+pub struct Rel {
+    id: String,
+    type_url: String,
+    target: String,
+}
+
+#[derive(Serialize, Debug, Clone)]
+pub struct Page {
+    shapes: Vec<Shape>,
+}
+
+#[derive(Serialize, Debug, Clone)]
+pub struct Shape {}
 
 fn real_main() -> i32 {
     let args: Vec<_> = std::env::args().collect();
@@ -18,21 +40,24 @@ fn real_main() -> i32 {
     }
     let fname = std::path::Path::new(&*args[1]);
     let out_dir = std::path::Path::new(&*args[2]);
+
+    if !(&*args[1])
+        .to_lowercase()
+        .ends_with(String::from(".vsdx").as_str())
+    {
+        println!("Only VSDX supports");
+        return 1;
+    }
+
     let file = fs::File::open(fname).unwrap();
     let reader = BufReader::new(file);
 
     let mut archive = zip::ZipArchive::new(reader).unwrap();
 
-    #[derive(Serialize, Deserialize, Debug)]
-    struct Shape {
-        cells: Vec<Cell>,
-    }
-
-    #[derive(Serialize, Deserialize, Debug, Clone)]
-    struct Cell {
-        name: String,
-        value: String,
-    }
+    let mut diagram = Diagram {
+        pages: vec![],
+        rels: HashMap::new(),
+    };
 
     for i in 0..archive.len() {
         let mut file: zip::read::ZipFile<'_, BufReader<fs::File>> = archive.by_index(i).unwrap();
@@ -59,8 +84,6 @@ fn real_main() -> i32 {
             );
         } else {
             let mangled_name = &file.mangled_name();
-            let xmlfile: BufReader<&mut zip::read::ZipFile<'_, BufReader<fs::File>>> =
-                BufReader::new(&mut file);
 
             let f_name_p = match mangled_name.file_name() {
                 Some(name) => name,
@@ -79,8 +102,8 @@ fn real_main() -> i32 {
             };
 
             // if fname == "page2.xml" {
-            // println!("{}", fname);
-            let hash_elements = get_metadata::encoding(xmlfile);
+            // println!("{:?}", &mangled_name.starts_with(base));
+            let hash_elements = get_metadata::encoding(&mut file, &mut diagram);
 
             let json_str = match to_string_pretty(&hash_elements) {
                 Ok(res) => res,
@@ -95,8 +118,20 @@ fn real_main() -> i32 {
                 json_str,
             )
             .expect("Unable to write file");
-            // }
         }
+
+        let json_str = match to_string_pretty(&diagram) {
+            Ok(res) => res,
+            Err(_) => {
+                print!("Err json");
+                "No data".to_string()
+            }
+        };
+        fs::write(
+            out_dir.join(std::path::Path::new(&("Diagram.json"))),
+            json_str,
+        )
+        .expect("Unable to write file");
     }
 
     0

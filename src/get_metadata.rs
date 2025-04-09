@@ -1,7 +1,12 @@
 use serde::Serialize;
+use std::fs::File;
 use std::io::BufReader;
 use std::{collections::HashMap, fs};
 use xml::reader::{EventReader, XmlEvent};
+use zip::read::ZipFile;
+
+use crate::Diagram;
+use crate::helpers::attrs_to_hashmap;
 
 #[derive(Serialize, Debug, Clone)]
 pub struct Element {
@@ -20,8 +25,31 @@ impl Element {
 }
 
 pub fn encoding(
-    xmlfile: BufReader<&mut zip::read::ZipFile<'_, BufReader<fs::File>>>,
+    file: &mut ZipFile<'_, BufReader<File>>,
+    diagram: &mut Diagram,
 ) -> HashMap<i64, Element> {
+    let mangled_name = &file.mangled_name();
+
+    // let f_name_p = match mangled_name.file_name() {
+    //     Some(name) => name,
+    //     None => {
+    //
+    //     }
+    // };
+
+    let fname = mangled_name.file_name().unwrap().to_str().unwrap();
+    println!("name {} ", fname);
+    //  {
+    //     Some(name) => name,
+    //     None => {
+    //         println!("No name");
+    //         String::from("").as_str()
+    //     }
+    // };
+    let mut temp_hash: HashMap<String, String> = HashMap::new();
+
+    let xmlfile: BufReader<&mut zip::read::ZipFile<'_, BufReader<fs::File>>> = BufReader::new(file);
+
     let mut hash_elements: HashMap<i64, Element> = HashMap::new();
 
     let parser: EventReader<BufReader<&mut zip::read::ZipFile<'_, BufReader<fs::File>>>> =
@@ -34,25 +62,37 @@ pub fn encoding(
             Ok(XmlEvent::StartElement {
                 name, attributes, ..
             }) => {
-                number_count += 1;
                 let tag_name = name.local_name;
+
+                if fname.ends_with(".rels") {
+                    if tag_name == "Relationship" {
+                        let mut param_name = String::new();
+                        let mut param_val = String::new();
+                        for attr in &attributes {
+                            let key = attr.to_owned().name.local_name;
+                            let value = attr.to_owned().value;
+                            if key == "Id" {
+                                param_name = value
+                            } else if key == "Target" {
+                                param_val = value
+                            }
+                        }
+
+                        temp_hash.insert(param_name, param_val);
+                    }
+                    continue;
+                }
+                number_count += 1;
 
                 let parent = match stack_numbers.last() {
                     Some(parent) => parent,
                     None => &0,
                 };
 
-                let mut attrs = HashMap::new();
-
-                for attr in &attributes {
-                    let key = attr.to_owned().name.local_name;
-                    let value = attr.to_owned().value;
-                    attrs.insert(key.to_owned(), value.to_owned());
-                }
                 let element = Element {
                     inner_id: number_count,
                     name: tag_name.to_owned(),
-                    attrs,
+                    attrs: attrs_to_hashmap(&attributes),
                     children: vec![],
                     parent: *parent,
                     params: HashMap::new(),
@@ -65,7 +105,6 @@ pub fn encoding(
 
                 hash_elements.entry(*parent).and_modify(|e: &mut Element| {
                     if tag_name == "Cell" {
-                        // let mut params = HashMap::new();
                         let mut param_name = String::new();
                         let mut param_val = HashMap::new();
                         for attr in &attributes {
@@ -86,7 +125,6 @@ pub fn encoding(
                 stack_numbers.push(number_count);
             }
             Ok(XmlEvent::EndElement { .. }) => {
-                // depth -= 1;
                 stack_numbers.pop();
             }
             Ok(XmlEvent::EndDocument { .. }) => {}
@@ -119,5 +157,8 @@ pub fn encoding(
             _ => {}
         }
     }
+    if fname.ends_with(".rels") {
+        diagram.rels.insert(fname.to_owned(), temp_hash);
+    };
     hash_elements
 }
