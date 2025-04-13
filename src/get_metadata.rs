@@ -10,12 +10,12 @@ use crate::helpers::attrs_to_hashmap;
 
 #[derive(Serialize, Debug, Clone)]
 pub struct Element {
-    inner_id: i64,
-    name: String,
-    attrs: HashMap<String, String>,
-    params: HashMap<String, HashMap<String, String>>,
-    children: Vec<i64>,
-    parent: i64,
+    pub inner_id: i64,
+    pub name: String,
+    pub attrs: HashMap<String, String>,
+    pub params: HashMap<String, HashMap<String, String>>,
+    pub children: Vec<i64>,
+    pub parent: i64,
 }
 
 impl Element {
@@ -68,6 +68,7 @@ pub fn encoding(
                     }
                     continue;
                 }
+
                 number_count += 1;
 
                 let parent = match stack_numbers.last() {

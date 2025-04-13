@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::BufReader;
 
+use helpers::get_masters_rel;
 use serde::Serialize;
 use serde_json::to_string_pretty;
 
@@ -15,6 +16,7 @@ fn main() {
 pub struct Diagram {
     rels: HashMap<String, HashMap<String, String>>,
     pages: Vec<Page>,
+    masters_rel: HashMap<String, String>,
 }
 
 #[derive(Serialize, Debug, Clone)]
@@ -57,6 +59,7 @@ fn real_main() -> i32 {
     let mut diagram = Diagram {
         pages: vec![],
         rels: HashMap::new(),
+        masters_rel: HashMap::new(),
     };
 
     for i in 0..archive.len() {
@@ -105,6 +108,10 @@ fn real_main() -> i32 {
             // println!("{:?}", &mangled_name.starts_with(base));
             let hash_elements = get_metadata::encoding(&mut file, &mut diagram);
 
+            if fname == "masters.xml" {
+                get_masters_rel(&hash_elements, &mut diagram);
+            }
+
             let json_str = match to_string_pretty(&hash_elements) {
                 Ok(res) => res,
                 Err(_) => {
@@ -112,9 +119,11 @@ fn real_main() -> i32 {
                     "No data".to_string()
                 }
             };
+            let res_folder = out_dir.join(std::path::Path::new(&("jsons")));
+            let _ = fs::create_dir(&res_folder);
 
             fs::write(
-                out_dir.join(std::path::Path::new(&(fname.to_owned() + ".json"))),
+                res_folder.join(std::path::Path::new(&(fname.to_owned() + ".json"))),
                 json_str,
             )
             .expect("Unable to write file");
