@@ -8,6 +8,7 @@ use serde_json::to_string_pretty;
 
 mod get_metadata;
 mod helpers;
+mod parse_vsd;
 
 fn main() {
     std::process::exit(real_main());
@@ -37,11 +38,19 @@ pub struct Shape {}
 fn real_main() -> i32 {
     let args: Vec<_> = std::env::args().collect();
     if args.len() < 3 {
-        println!("need out dir");
+        println!("need more args");
         return 1;
     }
     let fname = std::path::Path::new(&*args[1]);
     let out_dir = std::path::Path::new(&*args[2]);
+
+    if (&*args[1])
+        .to_lowercase()
+        .ends_with(String::from(".vsd").as_str())
+    {
+        parse_vsd::read_vsd::read_file(fname);
+        return 0;
+    }
 
     if !(&*args[1])
         .to_lowercase()
@@ -51,10 +60,24 @@ fn real_main() -> i32 {
         return 1;
     }
 
-    let file = fs::File::open(fname).unwrap();
+    let file = match fs::File::open(fname) {
+        Ok(res) => res,
+        Err(e) => {
+            println!("{e}");
+            return 1;
+        }
+    };
+
     let reader = BufReader::new(file);
 
     let mut archive = zip::ZipArchive::new(reader).unwrap();
+    // let mut archive = match zip::ZipArchive::(reader) {
+    //     Err(e) => {
+    //         println!("{e}");
+    //         return 1;
+    //     }
+    //     Ok(res) => res,
+    // };
 
     let mut diagram = Diagram {
         pages: vec![],

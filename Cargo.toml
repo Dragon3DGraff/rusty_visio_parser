@@ -10,3 +10,4 @@ author = "Dragon3DGraff"
   serde_json = "1.0.140"
   serde = { version = "1.0.219", features = ["derive"] }
   quickxml_to_serde = "0.6.0"
+  byteorder = "1.5.0"
