@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use xml::attribute::OwnedAttribute;
 
-use crate::{get_metadata::Element, parser_vsdx::read_vsdx::Diagram};
+use crate::{parser_vsdx::get_metadata::Element, parser_vsdx::read_vsdx::Diagram};
 
 pub fn attrs_to_hashmap(attributes: &Vec<OwnedAttribute>) -> HashMap<String, String> {
     let mut attrs: HashMap<String, String> = HashMap::new();

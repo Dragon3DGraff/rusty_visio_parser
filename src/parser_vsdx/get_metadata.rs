@@ -5,7 +5,7 @@ use std::{collections::HashMap, fs};
 use xml::reader::{EventReader, XmlEvent};
 use zip::read::ZipFile;
 
-use crate::helpers::attrs_to_hashmap;
+use super::helpers::attrs_to_hashmap;
 use crate::parser_vsdx::read_vsdx::Diagram;
 
 #[derive(Serialize, Debug, Clone)]

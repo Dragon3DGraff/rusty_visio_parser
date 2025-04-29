@@ -1,10 +1,14 @@
+mod get_metadata;
+mod helpers;
 pub mod read_vsdx {
-    use crate::get_masters_rel;
-    use crate::get_metadata;
+    use super::helpers::get_masters_rel;
+
     use serde_json::to_string_pretty;
     use std::{collections::HashMap, fs, io::BufReader, path::Path};
 
     use serde::Serialize;
+
+    use super::get_metadata;
 
     #[derive(Serialize, Debug, Clone)]
     pub struct Diagram {
@@ -134,5 +138,7 @@ pub mod read_vsdx {
             json_str,
         )
         .expect("Unable to write file");
+
+        print!("File {:?} converted!", &fname)
     }
 }

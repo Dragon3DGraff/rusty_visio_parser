@@ -1,7 +1,3 @@
-use helpers::get_masters_rel;
-
-mod get_metadata;
-mod helpers;
 mod parser_vsd;
 mod parser_vsdx;
 
