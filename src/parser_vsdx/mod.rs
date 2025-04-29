@@ -116,7 +116,6 @@ pub mod read_vsdx {
                 )
                 .expect("Unable to write file");
             }
-
         }
         let json_str = match to_string_pretty(&diagram) {
             Ok(res) => res,
@@ -125,8 +124,13 @@ pub mod read_vsdx {
                 "No data".to_string()
             }
         };
+
+        let file_name = &fname.file_name().unwrap().to_owned().into_string().unwrap();
+
+        let diagram_name = file_name.to_string() + "_Diagram.json";
+
         fs::write(
-            out_dir.join(std::path::Path::new(&("Diagram.json"))),
+            out_dir.join(std::path::Path::new(diagram_name.as_str())),
             json_str,
         )
         .expect("Unable to write file");
