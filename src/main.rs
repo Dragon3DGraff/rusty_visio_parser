@@ -1,7 +1,12 @@
+pub mod constants;
+mod helpers;
 mod parser_vsd;
 mod parser_vsdx;
+pub mod utils;
+mod  vsd_constants;
 
 fn main() {
+
     std::process::exit(job());
 }
 

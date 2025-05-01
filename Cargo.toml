@@ -11,3 +11,5 @@ author = "Dragon3DGraff"
   serde = { version = "1.0.219", features = ["derive"] }
   quickxml_to_serde = "0.6.0"
   byteorder = "1.5.0"
+  cfb = "0.10.0"
+  thiserror = "1.0"
