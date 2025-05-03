@@ -1,9 +1,9 @@
+use cfb::{self, Stream};
 use std::io::{self, Read, Seek, SeekFrom};
 use std::ops::Range;
-   use cfb::{self, Stream};
 
 /// Тип для представления потока ввода, аналогичный librevenge::RVNGInputStream
-pub trait RVNGInputStream:   Read + Seek {}
+pub trait RVNGInputStream: Read + Seek {}
 impl<T: Read + Seek> RVNGInputStream for T {}
 
 /// Внутренний поток для работы с VSD данными
@@ -27,10 +27,7 @@ impl VSDInternalStream {
 
         if !compressed {
             buffer.truncate(bytes_read);
-            Ok(Self {
-                buffer,
-                offset: 0,
-            })
+            Ok(Self { buffer, offset: 0 })
         } else {
             Self::decompress_buffer(&buffer[..bytes_read])
         }
@@ -125,7 +122,8 @@ impl Read for VSDInternalStream {
             return Ok(0);
         }
 
-        buf[..bytes_to_read].copy_from_slice(&self.buffer[self.offset..self.offset + bytes_to_read]);
+        buf[..bytes_to_read]
+            .copy_from_slice(&self.buffer[self.offset..self.offset + bytes_to_read]);
         self.offset += bytes_to_read;
 
         Ok(bytes_to_read)

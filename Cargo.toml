@@ -13,3 +13,6 @@ author = "Dragon3DGraff"
   byteorder = "1.5.0"
   cfb = "0.10.0"
   thiserror = "1.0"
+  log = "0.4"  # Для логгирования
+  encoding_rs = "0.8.35"
+  lazy_static = "1.5.0"
