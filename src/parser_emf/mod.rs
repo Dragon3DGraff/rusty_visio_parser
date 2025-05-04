@@ -18,11 +18,32 @@ pub mod read_emf {
                 let mut buf = Vec::new();
                 let _ = reader.read_to_end(&mut buf);
 
-                // for key_num in EMR_IDS.to_owned().into_keys() {
-                //     println!("key_num {}", key_num);
-                //     let _ = parser.parse_record(key_num, &buf);
-                // }
-                let _ = parser.parse_record(1, &buf);
+                let mut cursor = Cursor::new(&buf);
+
+                // let header = EmfHeader::parse(&mut cursor)?;
+
+                let mut records_count = 0;
+                while cursor.position() < buf.len() as u64 {
+                    let start_pos = cursor.position();
+                    let record_type = cursor
+                        .read_u32::<LittleEndian>()
+                        .map_err(|e| e.to_string())
+                        .unwrap();
+
+                    let record_size = cursor
+                        .read_u32::<LittleEndian>()
+                        .map_err(|e| e.to_string())
+                        .unwrap();
+
+                    // println!("record_type {} record_size {}", record_type, record_size);
+
+                    let _ = parser.parse_record(record_type, &buf);
+
+                    cursor.set_position(start_pos + record_size as u64);
+                    records_count += 1;
+                }
+
+                println!("records_count {} ", records_count);
 
                 let json_str = match to_string_pretty(&parser.model) {
                     Ok(res) => res,
@@ -241,7 +262,7 @@ pub mod read_emf {
         }
 
         pub fn polybezier(&mut self, size: usize, value: &[u8]) {
-             println!("parse polybezier");
+            println!("parse polybezier");
             // First parse the rectangle that contains the polybezier
             self.rectangle(size, value);
 
@@ -1032,18 +1053,18 @@ pub mod read_emf {
             self.add_iter("NumEntryStyle", num_style.to_string(), 48, 4, "<I");
 
             for i in 0..num_style {
-                // let offset = 52 + (i * 4) as usize;
-                // let dash_gap = Cursor::new(&value[offset..offset + 4])
-                //     .read_u32::<LittleEndian>()
-                //     .try_into();
+                let offset = 52 + (i * 4) as usize;
+                let dash_gap: u32 = Cursor::new(&value[offset..offset + 4])
+                    .read_u32::<LittleEndian>()
+                    .unwrap();
 
-                // self.add_iter(
-                //     &format!("Dash/Gap {}", i),
-                //     dash_gap.to_string(),
-                //     offset,
-                //     4,
-                //     "<I",
-                // );
+                self.add_iter(
+                    &format!("Dash/Gap {}", i),
+                    dash_gap.to_string(),
+                    offset,
+                    4,
+                    "<I",
+                );
             }
 
             self.add_iter(
