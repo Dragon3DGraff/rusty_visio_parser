@@ -1,10 +1,11 @@
 use parser_vsd::read_vsd::check_is_vsd;
 
 pub mod constants;
-mod helpers;
+mod VSDInternalStream;
 mod parser_emf;
 mod parser_vsd;
 mod parser_vsdx;
+mod VSDParser;
 
 pub mod utils;
 

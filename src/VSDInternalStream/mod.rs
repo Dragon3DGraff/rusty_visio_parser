@@ -8,8 +8,8 @@ impl<T: Read + Seek> RVNGInputStream for T {}
 
 /// Внутренний поток для работы с VSD данными
 pub struct VSDInternalStream {
-    buffer: Vec<u8>,
-    offset: usize,
+    pub buffer: Vec<u8>,
+    pub offset: usize,
 }
 
 impl VSDInternalStream {
