@@ -7,7 +7,7 @@ mod parser_vsd;
 mod parser_vsdx;
 mod VSDParser;
 
-pub mod utils;
+// pub mod utils;
 
 mod vsd_constants;
 

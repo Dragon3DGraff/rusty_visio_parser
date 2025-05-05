@@ -107,11 +107,7 @@ impl VSDParser {
         list_size: &mut u32,
         pointer_count: &mut u32,
     ) -> Result<(u32, u32), Box<dyn std::error::Error>> {
-        println!(
-            "{} {}",
-            "VSDParser::readPointerInfo",
-            input.stream_position().unwrap()
-        );
+        println!("readPointerInfo",);
         println!("shift {}", shift);
         // Переходим к позиции shift
         let _ = input.seek(SeekFrom::Start(shift as u64))?;
@@ -124,11 +120,10 @@ impl VSDParser {
         // Переходим к позиции offset + shift - 4
         let new_pos = (offset as u64) + (shift as u64) - 4;
 
-        println!("new_pos {}", new_pos);
         let _ = input.seek(SeekFrom::Start(new_pos))?;
 
         // Читаем размер списка и количество указателей
-        let mut list_size_val = match input.read_u32::<LittleEndian>() {
+        let list_size_val = match input.read_u32::<LittleEndian>() {
             Ok(va) => va,
             Err(_) => 0,
         };
@@ -142,6 +137,8 @@ impl VSDParser {
         *list_size = list_size_val;
         *pointer_count = pointer_count_val;
 
+        println!("pointer_count {}", pointer_count);
+
         // Пропускаем 4 байта
         let _ = input.seek(SeekFrom::Current(4));
 
@@ -150,7 +147,7 @@ impl VSDParser {
 
     pub fn parse_document(&mut self, input: &mut VSDInternalStream, shift: u32) -> bool {
         let mut visited = HashSet::new();
-        match self.handle_streams(input, VSD_TRAILER_STREAM.into(), shift, 0, &mut visited) {
+        match self.handle_streams(input, shift, 0, &mut visited) {
             Ok(_) => {
                 assert!(visited.is_empty());
                 true
@@ -165,7 +162,6 @@ impl VSDParser {
     fn handle_streams(
         &mut self,
         input: &mut VSDInternalStream,
-        ptr_type: u32,
         shift: u32,
         level: u32,
         visited: &mut HashSet<u32>,
@@ -206,7 +202,7 @@ impl VSDParser {
                     name_idx.insert(i as u32, ptr);
                 }
                 _ => {
-                    println!("ptr_list.insert");
+                    // println!("ptr_list.insert");
                     ptr_list.insert(i as u32, ptr);
                 }
             }
@@ -257,11 +253,6 @@ impl VSDParser {
         level: u32,
         visited: &mut HashSet<u32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        println!(
-            "VSDParser::handle_stream {} type 0x{:x}",
-            idx, ptr.type_name
-        );
-
         // self.header.level = level;
         // self.header.id = idx;
         // self.header.chunk_type = ptr.type;
@@ -270,7 +261,10 @@ impl VSDParser {
         // let mut tmp_stencil = VSDStencil::new();
         let compressed = (ptr.format & 2) == 2;
 
-        println!("compressed {}", compressed);
+        println!(
+            "VSDParser::handle_stream {} type 0x{} compressed {}",
+            idx, ptr.type_name, compressed
+        );
 
         self.input.seek(SeekFrom::Start(ptr.offset as u64))?;
         // let mut tmp_input = VSDInternalStream::new(
