@@ -1,5 +1,5 @@
-# VSDX parser
+### Parser of visio files - vsd and vsdx
 
 WIP
 
-Lycense MIT
+License MIT
