@@ -1,5 +1,5 @@
 [package]
-name = "rusty_vsdx"
+name = "rusty_visio_parser"
 version = "0.0.1"
 edition = "2024"
 author = "Dragon3DGraff"

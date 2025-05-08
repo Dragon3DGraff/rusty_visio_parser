@@ -1,6 +1,8 @@
-use crate::VSDInternalStream::VSDInternalStream;
+use crate::parser_vsd::vsdinternal_stream::VSDInternalStream;
 
-use crate::vsd_constants::object_types::{
+// use crate::parser_vsd::VSDInternalStream;
+
+use crate::parser_vsd::vsd_constants::object_types::{
     VSD_FONTFACES, VSD_NAME_LIST2, VSD_NAMEIDX, VSD_NAMEIDX123, VSD_OLE_LIST, VSD_PAGE,
     VSD_SHAPE_GROUP, VSD_SHAPE_SHAPE, VSD_STENCIL_PAGE, VSD_STENCILS, VSD_TRAILER_STREAM,
 };

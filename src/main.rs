@@ -1,15 +1,8 @@
-use parser_vsd::read_vsd::check_is_vsd;
-
-pub mod constants;
-mod VSDInternalStream;
-mod parser_emf;
-mod parser_vsd;
-mod parser_vsdx;
-mod VSDParser;
+use rusty_visio_parser::parser_emf;
+use rusty_visio_parser::parser_vsd;
+use rusty_visio_parser::parser_vsdx;
 
 // pub mod utils;
-
-mod vsd_constants;
 
 fn main() {
     std::process::exit(job());
@@ -26,8 +19,8 @@ fn job() -> i32 {
 
     let extention = (&*args[1]).to_lowercase();
 
-    if (&extention).ends_with(String::from(".vsd").as_str()) && check_is_vsd(fname) {
-        parser_vsd::read_vsd::read_file(fname);
+    if (&extention).ends_with(String::from(".vsd").as_str()) {
+        parser_vsd::read_file(fname);
         return 0;
     }
 
